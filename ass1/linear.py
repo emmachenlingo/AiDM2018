@@ -1,19 +1,11 @@
 
 import numpy as np
-import sys
 from time import time
+
 #record time
 before = time()
+
 #load data
-'''
-ratings=[]
-f = open("datasets/ratings.dat", 'r')
-for line in f:
-    data = line.split('::')
-    ratings.append([int(z) for z in data[:3]])
-f.close()
-ratings=np.array(ratings)
-'''
 ratings = np.genfromtxt("datasets/ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int')
 
 #total number of movies and users
@@ -68,16 +60,19 @@ for fold in range(nfolds):
         else:
             R_movie[x-1] = gmr
 
+#construct matrix for least square regression
     X = np.vstack([R_user[train[:,0]-1], R_movie[train[:,1]-1], gmr*np.ones(train.shape[0])]).T
     y = train[:,2]
     S = np.linalg.lstsq(X,y)
-    
+
+#prediction is the linear combination of the 3 kinds of averages    
     pred = np.dot(X, S[0][:,np.newaxis]).flatten()  
 
+#prediction of the test data
     X_test = np.vstack([R_user[test[:,0]-1], R_movie[test[:,1]-1], gmr*np.ones(test.shape[0])]).T
     pred_test = np.dot(X_test, S[0][:,np.newaxis]).flatten()
 
-#with round
+#with rounding
     pred[pred>5] = 5
     pred[pred<1] = 1
     pred_test[pred_test>5] = 5
@@ -102,8 +97,7 @@ print("Root Mean Squared error on  TEST: " + str(np.mean(rmse_test)))
 
 print("Mean Absolute error on TRAIN: " + str(np.mean(mae_train)))
 print("Mean Absolute error on  TEST: " + str(np.mean(mae_test)))
-# Just in case you need linear regression: help(np.linalg.lstsq) will tell you 
-# how to do it!
 
+#claculate the total run time
 interval = time() - before
 print("Time interval (s):{0}".format(interval))

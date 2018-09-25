@@ -1,16 +1,4 @@
-
-"""
-Created on Fri Sep 18 21:09:10 2015
-
-@author: Wojtek Kowalczyk
-
-This script demonstrates how implement the "global average rating" recommender 
-and validate its accuracy with help of 5-fold cross-validation.
-
-"""
-
 import numpy as np
-import sys
 from time import time
 before = time()
 
@@ -23,19 +11,6 @@ for line in f:
     ratings.append([int(z) for z in data[:3]])
 f.close()
 ratings=np.array(ratings)
-
-"""
-Alternatively, instead of reading data file line by line you could use the Numpy
-genfromtxt() function. For example:
-
-ratings = np.genfromtxt("ratings.dat", usecols=(0, 1, 2), delimiter='::', dtype='int')
-
-will create an array with 3 columns.
-
-Additionally, you may now save the rating matrix into a binary file 
-and later reload it very quickly: study the np.save and np.load functions.
-"""
-
 
 #split data into 5 train and test folds
 nfolds=5
@@ -59,8 +34,7 @@ for fold in range(nfolds):
     test_sel=np.array([x==fold for x in seqs])
     train=ratings[train_sel]
     test=ratings[test_sel]
-
-    #print(train.shape, test.shape)    
+  
 #calculate model parameters: mean rating over the training set:
     gmr=np.mean(train[:,2])
 
@@ -83,7 +57,6 @@ print("Root Mean Squared error on  TEST: " + str(np.mean(rmse_test)))
 
 print("Mean Absolute error on TRAIN: " + str(np.mean(mae_train)))
 print("Mean Absolute error on  TEST: " + str(np.mean(mae_test)))
-# Just in case you need linear regression: help(np.linalg.lstsq) will tell you 
-# how to do it!
+
 interval = time() - before
 print("Time interval (s):{0}".format(interval))
