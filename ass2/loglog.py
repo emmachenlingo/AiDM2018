@@ -1,6 +1,8 @@
 import random
 import matplotlib.pyplot as plt 
+import matplotlib as mpl
 from math import log
+import numpy as np 
 import pickle
 
 def trailing_zeroes(num):
@@ -31,7 +33,7 @@ def estimate_cardinality(values, k):
 def generate_random(length):
   values = [random.randint(0, 0xffffffff) for i in xrange(length)]
   return values
-
+'''
 fig = plt.figure(figsize=(10,6))
 for k in range(5,11):
   RAE=[]
@@ -65,6 +67,38 @@ fig = plt.figure(figsize=(10,6))
 plt.hist(registers, bins=range(5,25), facecolor='k', alpha=0.5)
 plt.axvline(float(sum(registers))/2**k,color='r', label='True value')
 plt.xlabel('Register value (R)')
+plt.ylabel('Number')
 plt.legend()
 plt.savefig('log-hist.png')
 plt.close(fig)
+'''
+
+def standard_error(N_true=100000, outfig='log-std-err.png'):
+  std_err=[]
+  for k in range(5,11):
+    ests=[]
+    print(k)
+    for i in range(100):
+      values = generate_random(N_true)
+      N = len(set(values))
+      est_N, registers = estimate_cardinality(values, k)
+      ests.append(est_N)
+    std_err.append(np.sqrt(np.var(np.array(ests)))/N_true)
+  
+  x = np.linspace(4.5,10.5,1000)
+  y = 1.3/np.sqrt(2**x)
+
+  mpl.rc('xtick', labelsize=20)
+  mpl.rc('ytick', labelsize=20)
+  mpl.rc('text', usetex=True)
+
+  fig = plt.figure(figsize=(10,6))
+  plt.scatter(range(5,11),std_err, color='k',marker='*', s=100, label='Experiments')
+  plt.plot(x, y, '-k', lw=4, alpha=0.6, label='$1.3/\sqrt{m}$')
+  plt.xlabel('$log_2(m)$',fontsize=20)
+  plt.ylabel('$Standard$ $Error$',fontsize=20)
+  plt.legend()
+  plt.savefig(outfig)
+  plt.close(fig)
+
+standard_error()
